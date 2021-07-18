@@ -9,17 +9,17 @@ from mutagen.flac import FLAC
 
 
 currently_playing = False
-music_path = abspath(getcwd()) + '\\MediaManager\\Music\\'
+MUSIC_PATH = abspath(getcwd()) + '\\Music\\'
 music_files = {}
 album_title = None
 TEXT_ENCODING = 'utf8'
-
+current_state = None
 
 # Removes all ID3 tags from mp3 files in Music dir
 def remove_tags():
-    for album in listdir(music_path):
-        for song in listdir(music_path + album):
-            file_name = join(music_path + album, song)
+    for album in listdir(MUSIC_PATH):
+        for song in listdir(MUSIC_PATH + album):
+            file_name = join(MUSIC_PATH + album, song)
             if file_name.lower().endswith('.mp3'):
                 mp3 = MP3(file_name)
                 try:
@@ -31,17 +31,17 @@ def remove_tags():
 
 # Removes and spaces in album and songs
 def convert_files():
-    for album in listdir(music_path):
-        rename(music_path+album, music_path + (album.replace(" ", "")))
+    for album in listdir(MUSIC_PATH):
+        rename(MUSIC_PATH+album, MUSIC_PATH + (album.replace(" ", "")))
 
-    for album in listdir(music_path):
-        for song in listdir(music_path + album):
-            rename(music_path+album+'\\'+song, music_path + album + '\\' + (song.replace(" ", "")))
+    for album in listdir(MUSIC_PATH):
+        for song in listdir(MUSIC_PATH + album):
+            rename(MUSIC_PATH+album+'\\'+song, MUSIC_PATH + album + '\\' + (song.replace(" ", "")))
 
 
 def get_music(music: dict):
-    for album in listdir(music_path):
-        songs = [[f for f in listdir(music_path + album)]]
+    for album in listdir(MUSIC_PATH):
+        songs = [[f for f in listdir(MUSIC_PATH + album)]]
         music[album] = songs
     return music
 
@@ -50,28 +50,54 @@ def get_input(music):
     return next((elem for elem in music if elem == input('Type album title: ')), None)
 
 
-def play_music(song):
+def play_music(song, time_left):
     global currently_playing
+    global current_state
     currently_playing = True
     mixer.init()
     mixer.music.load(song)
     mixer.music.play()
-    while mixer.music.get_busy():
-        sleep(5)
-    currently_playing = False
+    while currently_playing:
+        sleep(1)
+        if current_state == 'play':
+            mixer.music.unpause()
+            current_state = None
+        if current_state == 'pause':
+            mixer.music.pause()
+            current_state = None
+        if current_state == 'skip':
+            mixer.music.stop()
+            time_left = 0
+            current_state = None
+        time_left -= 1
+        if time_left < 1:
+            currently_playing = False
+
+
+
+
+def control_music():
+    settings = ['play', 'pause', 'skip']
+    print('controls:', settings)
+    global current_state
+    while True:
+        user_input = str(input("> "))
+        for option in settings:
+            if user_input == option:
+                current_state = option
 
 
 
 def player(album, music):
     global currently_playing
-    album_path = music_path + album
+    album_path = MUSIC_PATH + album
     lst = [i for i in range(5)]
     song_list = [song for song in listdir(album_path)]
     for song in song_list:
         while currently_playing:
             sleep(5)
         # create thread and play songs until complete add audio settings in main
-        song_path = music_path + album + '\\' + song
+        song_path = MUSIC_PATH + album + '\\' + song
         song_name, extension = splitext(song)
         if extension == '.mp3':
             song_type = MP3(song_path)
@@ -84,14 +110,15 @@ def player(album, music):
         if not currently_playing:
             try:
                 print("playing: " + song)
-                # t1 = threading.Thread(target=main)
-                t2 = threading.Thread(target=play_music, args=[song_path])
-                # t1.start()
-                t2.start()
-                sleep(song_type.info.length)
+                time_left = song_type.info.length
+                control_thread = threading.Thread(target=control_music)
+                music_thread = threading.Thread(target=play_music, args=[song_path , time_left])
+                control_thread.start()
+                music_thread.start()
+                while currently_playing:
+                    sleep(1)
             except ValueError:
                 print("Could not play: " + song)
-
 
 
 if __name__ == '__main__':
@@ -102,3 +129,4 @@ if __name__ == '__main__':
     while album_title is None:
         album_title = get_input(music_files)
     player(album_title, music_files)
+
