@@ -34,7 +34,7 @@ class MusicManager:
             self.duration = 0
         self.time_left = self.duration
 
-    def audio_menu(self, time_left, time_total, currently_playing):
+    def audio_menu(self, time_left, time_total, currently_playing, song_name, album):
         clear_term()
         clock = f'{round(time_total - time_left)} / {round(time_total)}'
         percent_done = round((100 / time_total) * (time_total - time_left))
@@ -44,9 +44,9 @@ class MusicManager:
         else:
             play_button = '▶▶'
         print('───────────────────|FUNGUS AMP|────────────────────')
-        print(f"now playing: {self.song_name} from {self.album}")
+        print(f"now playing:  {song_name} \nfrom:  {album}")
         print(f'{bar}')
-        print(f'     ◄◄⠀{play_button} ►►⠀⠀   ⠀{clock}                   ⠀───○ ⠀')
+        print(f'     ──⠀{play_button} ──⠀⠀   ⠀{clock}                   ⠀───○ ⠀')
         print(f'\n1: resume      2: pause      3: skip      4: rewind')
         print('───────────────────|FUNGUS AMP|────────────────────')
 
@@ -57,7 +57,7 @@ class MusicManager:
         mixer.music.load(self.song_path)
         mixer.music.play()
         while True:
-            music.audio_menu(self.time_left, self.duration, self.currently_playing)
+            music.audio_menu(self.time_left, self.duration, self.currently_playing, self.song_name, self.album)
             sleep(1)
             if self.currently_playing:
                 self.time_left -= 1
