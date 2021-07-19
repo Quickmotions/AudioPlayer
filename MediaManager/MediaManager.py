@@ -9,11 +9,12 @@ from mutagen.flac import FLAC
 
 
 currently_playing = False
-MUSIC_PATH = abspath(getcwd()) + '\\Music\\'
+MUSIC_PATH = abspath(getcwd()) + '\\MediaManager\\Music\\'
 music_files = {}
 album_title = None
 TEXT_ENCODING = 'utf8'
 current_state = None
+
 
 # Removes all ID3 tags from mp3 files in Music dir
 def remove_tags():
