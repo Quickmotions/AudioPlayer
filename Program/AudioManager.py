@@ -59,7 +59,10 @@ class MusicManager:
             flac_tmp_audio_data.export(self.song_path.name.replace(self.song_path.suffix, "") + ".wav", format="wav")
             temp_wav = f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav'
         mixer.init()
-        mixer.music.load(temp_wav)
+        if self.extension == '.flac':
+            mixer.music.load(temp_wav)
+        else:
+            mixer.music.load(self.song_path)
         mixer.music.play()
         while True:
             music.audio_menu(self.time_left, self.duration, self.currently_playing, self.song_name, self.album)
