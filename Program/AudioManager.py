@@ -4,6 +4,7 @@ from os.path import abspath, splitext
 from time import sleep, time
 from math import ceil
 from select import select
+from pathlib import Path
 import threading
 # dependencies
 from pygame import mixer
@@ -55,12 +56,13 @@ class MusicManager:
         self.time_left = self.duration
         self.currently_playing = True
         if self.extension == '.flac':
-            flac_tmp_audio_data = AudioSegment.from_file(self.song_path, self.song_path.suffix[1:])
-            flac_tmp_audio_data.export(self.song_path.name.replace(self.song_path.suffix, "") + ".wav", format="wav")
-            temp_wav = f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav'
+            flac_path = Path(f'Music\\{self.album}\\{self.song}')
+            wav_path = "%s.wav" % splitext(self.song_path)[0]
+            song = AudioSegment.from_file(flac_path)
+            song.export(wav_path, format="wav")
         mixer.init()
         if self.extension == '.flac':
-            mixer.music.load(temp_wav)
+            mixer.music.load(wav_path)
         else:
             mixer.music.load(self.song_path)
         mixer.music.play()
@@ -131,7 +133,8 @@ def play_playlist(playlist, music_list):
     for music in music_list:
         if music.song == playlist[0]:
             print(f"now playing: {music.song_name} from {music.album}")
-            print(f"next up:     {playlist[1]} from {music.album}")
+            if len(playlist) > 1:
+                print(f"next up:     {playlist[1]} from {music.album}")
             print('--------------------------------------')
             control_thread = threading.Thread(target=music.music_controller, args=[])
             music_thread = threading.Thread(target=music.play_song, args=[playlist])
