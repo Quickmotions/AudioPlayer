@@ -9,6 +9,7 @@ import threading
 from pygame import mixer
 from mutagen.mp3 import MP3
 from mutagen.flac import FLAC
+from pydub import AudioSegment
 
 MUSIC_PATH = abspath(getcwd()) + '\\Music\\'
 
@@ -53,8 +54,12 @@ class MusicManager:
     def play_song(self, playlist):
         self.time_left = self.duration
         self.currently_playing = True
+        if self.extension == '.flac':
+            flac_tmp_audio_data = AudioSegment.from_file(self.song_path, self.song_path.suffix[1:])
+            flac_tmp_audio_data.export(self.song_path.name.replace(self.song_path.suffix, "") + ".wav", format="wav")
+            temp_wav = f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav'
         mixer.init()
-        mixer.music.load(self.song_path)
+        mixer.music.load(temp_wav)
         mixer.music.play()
         while True:
             music.audio_menu(self.time_left, self.duration, self.currently_playing, self.song_name, self.album)
