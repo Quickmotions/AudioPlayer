@@ -55,13 +55,14 @@ class MusicManager:
     def play_song(self, playlist):
         self.time_left = self.duration
         self.currently_playing = True
-        if self.extension == '.flac':
-            wav_path = f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav'
-            song = AudioSegment.from_file(self.song_path)
-            song.export(wav_path, format="wav")
+        # if self.extension == '.flac':
+        #     wav_path = Path(f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav')
+        #     song = AudioSegment.from_file(self.song_path)
+        #     song.export(wav_path, format="wav")
         mixer.init()
         if self.extension == '.flac':
             mixer.music.load(wav_path)
+            # https://simpleaudio.readthedocs.io/en/latest/tutorial.html try this
         else:
             mixer.music.load(self.song_path)
         mixer.music.play()
