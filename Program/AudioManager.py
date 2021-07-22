@@ -56,9 +56,8 @@ class MusicManager:
         self.time_left = self.duration
         self.currently_playing = True
         if self.extension == '.flac':
-            flac_path = Path(f'Music\\{self.album}\\{self.song}')
-            wav_path = "%s.wav" % splitext(self.song_path)[0]
-            song = AudioSegment.from_file(flac_path)
+            wav_path = f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav'
+            song = AudioSegment.from_file(self.song_path)
             song.export(wav_path, format="wav")
         mixer.init()
         if self.extension == '.flac':
