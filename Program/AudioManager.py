@@ -1,16 +1,13 @@
 import time
 from os import listdir, getcwd, name, system
 from os.path import abspath, splitext
-from time import sleep, time
-from math import ceil
-from select import select
-from pathlib import Path
+from time import sleep
 import threading
 # dependencies
-from pygame import mixer
 from mutagen.mp3 import MP3
 from mutagen.flac import FLAC
 from pydub import AudioSegment
+from pydub.playback import play
 
 MUSIC_PATH = abspath(getcwd()) + '\\Music\\'
 
@@ -55,17 +52,8 @@ class MusicManager:
     def play_song(self, playlist):
         self.time_left = self.duration
         self.currently_playing = True
-        # if self.extension == '.flac':
-        #     wav_path = Path(f'{MUSIC_PATH}{self.album}\\{self.song_name}.wav')
-        #     song = AudioSegment.from_file(self.song_path)
-        #     song.export(wav_path, format="wav")
-        mixer.init()
-        if self.extension == '.flac':
-            mixer.music.load(wav_path)
-            # https://simpleaudio.readthedocs.io/en/latest/tutorial.html try this
-        else:
-            mixer.music.load(self.song_path)
-        mixer.music.play()
+        new_song_thread = threading.Thread(target=music.start, args=[self.song_path])
+        new_song_thread.start()
         while True:
             music.audio_menu(self.time_left, self.duration, self.currently_playing, self.song_name, self.album)
             sleep(1)
@@ -75,6 +63,9 @@ class MusicManager:
                     self.currently_playing = False
                     playlist_edit(None, 'remove', playlist)
                     break
+
+    def start(self, song_path):
+        play(AudioSegment.from_file(song_path))
 
     def pause(self):
         mixer.music.pause()
