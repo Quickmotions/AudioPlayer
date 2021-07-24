@@ -65,6 +65,7 @@ class MusicManager:
                     break
 
     def start(self, song_path):
+        # https: // docs.python.org / 2 / library / multiprocessing.html
         play(AudioSegment.from_file(song_path))
 
     def pause(self):
